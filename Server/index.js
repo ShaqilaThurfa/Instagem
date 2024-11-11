@@ -4,9 +4,17 @@ const { startStandaloneServer } = require('@apollo/server/standalone');
 // Sample data
 const users = [
   {
+    id: 1,
     name: "Qila",
     username: "Qila123",
     email: "Qila@gmail.com",
+    password: "hehehe"
+  },
+  {
+    id: 2,
+    name: "Qili",
+    username: "Qili123",
+    email: "Qili@gmail.com",
     password: "hehehe"
   }
 ];
@@ -45,9 +53,9 @@ const follows = [
     followingId: 1,
     followerId: 1,
     createdAt: "String",
-    updatedAt: "String",
+    updatedAt: "String"
   }
-];
+]
 
 // Define typeDefs
 const typeDefs = `#graphql
@@ -97,6 +105,16 @@ const typeDefs = `#graphql
     comments: [Comment]
     likes: [Like]
     follows: [Follow]
+    userById(id: ID!): User
+  }
+
+  type Mutation {
+    addUser(
+    id: Int,
+    name: String,
+    username: String,
+    email: String,
+    password: String): User
   }
 `;
 
@@ -107,8 +125,19 @@ const resolvers = {
     posts: () => posts,
     likes: () => likes,
     comments: () => comments,
-    follows: () => follows 
+    follows: () => follows, 
+    userById: (_, args) => {
+      return users.find((user) => user.id == args.id);
+    }
   },
+
+  Mutation: {
+    addUser: (_, args) => {
+     const newUser = ({...args})
+     users.push(newUser);
+     return newUser
+    }
+  }
 };
 
 
