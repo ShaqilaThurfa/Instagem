@@ -60,7 +60,6 @@ const follows = [
 // Define typeDefs
 const typeDefs = `#graphql
   
-
   type User {
     name: String
     username: String
