@@ -11,6 +11,44 @@ const users = [
   }
 ];
 
+const comments = [
+  {
+    content: "ii kasiaan de loo",
+    username: "akulucu123",
+    createdAt: "11/11/2024",
+    updatedAt: "11/11/2024",
+  }
+];
+const likes = [
+  {
+    username: "akulucu123",
+    createdAt: "11/11/2024",
+    updatedAt: "11/11/2024",
+  }
+];
+
+const posts = [
+  {
+    content: "aku sedih, duduk sendiri",
+    tags: [],
+    imgUrl: "https://tse1.mm.bing.net/th?id=OIP.ylpPUiCLMqNrvFFbeWvshwAAAA&pid=Api&P=0&h=180",
+    authorId: 1,
+    comments: [comments],
+    likes: [likes],
+    createdAt: "11/11/2024",
+    updatedAt: "11/11/2024",
+  }
+];
+
+const follows = [
+  {
+    followingId: 1,
+    followerId: 1,
+    createdAt: "String",
+    updatedAt: "String",
+  }
+];
+
 // Define typeDefs
 const typeDefs = `#graphql
   
@@ -56,6 +94,9 @@ const typeDefs = `#graphql
   type Query {
     users: [User]
     posts: [Post]
+    comments: [Comment]
+    likes: [Like]
+    follows: [Follow]
   }
 `;
 
@@ -63,7 +104,10 @@ const typeDefs = `#graphql
 const resolvers = {
   Query: {
     users: () => users,
-    posts: () => [] 
+    posts: () => posts,
+    likes: () => likes,
+    comments: () => comments,
+    follows: () => follows 
   },
 };
 
