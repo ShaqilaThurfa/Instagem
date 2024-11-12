@@ -1,60 +1,64 @@
+const { ObjectId } = require("mongodb");
 const { database } = require("../config/mongodb");
 
 module.exports = class Post {
   static async findAll() {
-    const postscollection = database.collection("posts");
+    const postsCollection = database.collection("posts");
 
-    // Query for movies that have a runtime less than 15 minutes
-    // const query = { runtime: { $lt: 15 } };
     const options = {
-      // Sort returned documents in ascending order by title (A->Z)
       sort: { name: 1 },
-      // Include only the `title` and `imdb` fields in each returned document
       projection: { content: 1, username: 1 },
     };
 
-    const posts = await postscollection.find({}, options).toArray();
-    // Print a message if no documents were found
+    const posts = await postsCollection.find({}, options).toArray();
     return posts;
   }
 
-  static async findPost(Id) {
-    const postscollection = database.collection("posts");
+  static async findPost(id) {
+    const postsCollection = database.collection("posts");
 
-    const post = await postscollection.findOne({ _id: new ObjectId(Id) });
-    return post
+    const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+    return post;
   }
 
-  static async createPost(newPost) {
-    const postscollection = database.collection("posts");
+  static async createPost(content, imgUrl, authorId, tags) {
+    const postsCollection = database.collection("posts");
 
     const timestamp = new Date();
-    newPost.createdAt = timestamp;
-    newPost.updatedAt = timestamp;
+    const newPost = {
+      content,
+      imgUrl,
+      authorId,
+      tags,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
 
-    const result = await postscollection.insertOne(newPost);
+    const result = await postsCollection.insertOne(newPost);
 
-    return result;
+    console.log(result)
+    
+    return {
+      ...newPost, 
+      _id: result.insertedId, 
+    };
   }
-  static async updatePost(updatedPost) {
-    const postscollection = database.collection("posts");
 
-    const result = await postscollection.updateOne(updatedPost);
+  // static async updatePost(postId, updatedPost) {
+  //   const postsCollection = database.collection("posts");
 
-    return result;
-  }
+  //   const result = await postsCollection.updateOne(
+  //     { _id: new ObjectId(postId) },
+  //     { $set: updatedPost }
+  //   );
 
-  static async findPost(postId) {
-    const postscollection = database.collection("posts");
-
-    const result = await postscollection.findOne({ _id: postId});       
-
-  }
+  //   return result;
+  // }
 
   static async deletePost(postId) {
-    const postscollection = database.collection("posts");
+    const postsCollection = database.collection("posts");
 
-    const result = await postscollection.deleteOne(postId);
-}
-
+    const result = await postsCollection.deleteOne({ _id: new ObjectId(postId) });
+    return result;
+  }
 };

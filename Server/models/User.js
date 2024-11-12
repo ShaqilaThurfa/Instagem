@@ -11,7 +11,7 @@ class User {
       // Sort returned documents in ascending order by title (A->Z)
       sort: { name: 1 },
       // Include only the `title` and `imdb` fields in each returned document
-      projection: { password: 1, name: 1, email: 1, username: 1},
+      projection: { name: 1, email: 1, username: 1},
     };
 
    
