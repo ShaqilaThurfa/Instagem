@@ -1,6 +1,7 @@
 const { database } = require("../config/mongodb");
 const { checkPassword } = require("../helpers/hashingpassword");
 const { signToken } = require("../helpers/jwt");
+const { ObjectId } = require("mongodb");
 
 
 class User {
@@ -74,6 +75,16 @@ class User {
     } catch (error) {
       throw new Error("Failed to Login");
     }
+  }
+
+  static async findById(_id) { 
+    const userscollection = database.collection("users");
+
+    const user = await userscollection.findOne({ _id: new ObjectId(_id) });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
   }
 }
 module.exports = User;

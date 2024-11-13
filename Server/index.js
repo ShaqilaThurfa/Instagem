@@ -1,25 +1,10 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
+const { ObjectId } = require("mongodb");
 
 const User = require("./models/User");
 const Post = require("./models/Post");
 const { hashPassword, checkPassword } = require("./helpers/hashingpassword");
-
-// Sample data for posts
-const posts = [
-  {
-    id: "1",
-    content: "This is a sample post",
-    tags: ["example", "sample"],
-    imgUrl: "https://example.com/image.jpg",
-    authorId: "1",
-    comments: [],
-    likes: [],
-    createdAt: "11/11/2024",
-    updatedAt: "11/11/2024",
-  },
-  // Add more sample posts here if needed
-];
 
 const typeDefs = `#graphql
   type User {
@@ -78,20 +63,17 @@ const typeDefs = `#graphql
     comments: [Comment]
     likes: [Like]
     follows: [Follow]
-    userById(_id: ID!): User
     getUserDetail: User
     postById(id: ID!): Post
+    userById(_id: ID!): User
   }
 
   type Mutation {
     createPost(
-      _id: ID!
       content: String!
       tags: [String]
       imgUrl: String
       authorId: ID!
-      createdAt: String
-      updatedAt: String
     ): Post
 
     updatePost(_id: ID!, tags: [String], content: String, imgUrl: String): Post
@@ -122,15 +104,21 @@ const resolvers = {
         throw new Error(error.message);
       }
     },
-    postById: async (_, { id }) => {
-      // console.log(id);
-      
+    userById: async (_, { _id }) => {
       try {
-        return Post.findById(id);
+        return await User.findById(new ObjectId(_id)); // Pastikan ObjectId digunakan di sini
       } catch (error) {
         throw new Error(error.message);
       }
     },
+    postById: async (_, { id }) => {
+      try {
+        return await Post.findById(new ObjectId(id)); // Pastikan ObjectId digunakan di sini
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    
   },
 
   Mutation: {
@@ -138,9 +126,9 @@ const resolvers = {
       try {
         const newPost = await Post.createPost(
           args.content,
-          args.tags,
           args.imgUrl,
-          args.authorId
+          args.authorId,
+          args.tags
         );
         return newPost;
       } catch (error) {
@@ -151,18 +139,18 @@ const resolvers = {
     updatePost: async (_, args) => {
       try {
         const { _id, content, tags, imgUrl } = args;
-        const postIndex = posts.findIndex((post) => post.id === _id);
+        const post = await Post.findById(_id);
 
-        if (postIndex === -1) {
+        if (!post) {
           throw new Error("Post not found");
         }
 
-        const updatedPost = posts[postIndex];
-        if (content) updatedPost.content = content;
-        if (tags) updatedPost.tags = tags;
-        if (imgUrl) updatedPost.imgUrl = imgUrl;
+        if (content) post.content = content;
+        if (tags) post.tags = tags;
+        if (imgUrl) post.imgUrl = imgUrl;
 
-        return updatedPost;
+        await Post.updateOne(_id, { content, tags, imgUrl });
+        return post;
       } catch (error) {
         throw new Error(error.message);
       }
