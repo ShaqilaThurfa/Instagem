@@ -39,10 +39,16 @@ const likes = [
 
 const typeDefs = `#graphql
   type User {
+    _id: ID
     name: String
     username: String
     email: String
     password: String
+  }
+
+  type Token {
+    user: User
+    accessToken: String
   }
 
   type Post {
@@ -88,10 +94,6 @@ const typeDefs = `#graphql
     postById(id: ID!): Post
   }
 
-  type Token {
-    accessToken: String
-  }
-
   type Mutation {
     createPost(
       _id: ID!
@@ -105,7 +107,9 @@ const typeDefs = `#graphql
 
     updatePost(_id: ID!, tags: [String], content: String, imgUrl: String): Post
 
-    login(email: String!, password: String!): Token
+    login(username: String!, password: String!): Token
+
+    register(name: String!, username: String!, email: String!, password: String!): User
   }
 `;
 
@@ -174,27 +178,49 @@ const resolvers = {
       }
     },
 
-    login: async (_, { email, password }) => {
+    register: async (_, args) => {
       try {
-        const user = await User.findByEmail(email);
+        const { name, username, email, password } = args;
+        // console.log(name, username, email, password);
+        
+        const hashedPassword = hashPassword(password);
 
-        if (!user) {
-          throw new Error("User not found");
+        const newUser = await User.createUser({
+          name,
+          username,
+          email,
+          password: hashedPassword,
+        });
+
+        // console.log(newUser);
+        
+
+        return {
+          _id: newUser._id,  
+          name: newUser.name,
+          username: newUser.username,
+          email: newUser.email,
+          password: newUser.password,
         }
 
-        const isPasswordValid = checkPassword(password, user.password);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
 
-        if (!isPasswordValid) {
-          throw new Error("Invalid email/password");
+    login: async (_, { username, password }) => {
+      try {
+
+        const userData = await User.login({ username, password });
+        // console.log(userData);
+        
+        return {
+          user: userData.user,
+          accessToken: userData.token,
         }
-
-        const token = {
-          accessToken: signToken({
-            id: user._id,
-            email: user.email,
-          }),
-        };
-        return token;
+        
+        
+        
       } catch (error) {
         throw new Error(error.message);
       }
