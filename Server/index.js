@@ -5,7 +5,7 @@ const User = require("./models/User");
 const Post = require("./models/Post");
 const { hashPassword, checkPassword } = require("./helpers/hashingpassword");
 
-// Sample data for posts (replace this with actual database fetching logic)
+// Sample data for posts
 const posts = [
   {
     id: "1",
@@ -19,22 +19,6 @@ const posts = [
     updatedAt: "11/11/2024",
   },
   // Add more sample posts here if needed
-];
-
-const comments = [
-  {
-    content: "ii kasiaan de loo",
-    username: "akulucu123",
-    createdAt: "11/11/2024",
-    updatedAt: "11/11/2024",
-  },
-];
-const likes = [
-  {
-    username: "akulucu123",
-    createdAt: "11/11/2024",
-    updatedAt: "11/11/2024",
-  },
 ];
 
 const typeDefs = `#graphql
@@ -61,6 +45,11 @@ const typeDefs = `#graphql
     likes: [Like]
     createdAt: String
     updatedAt: String
+  }
+
+  input CommentInput {
+    content: String!
+    username: String!
   }
 
   type Comment {
@@ -110,6 +99,8 @@ const typeDefs = `#graphql
     login(username: String!, password: String!): Token
 
     register(name: String!, username: String!, email: String!, password: String!): User
+
+    commentPost(postId: ID!, comment: CommentInput!): Post
   }
 `;
 
@@ -132,8 +123,10 @@ const resolvers = {
       }
     },
     postById: async (_, { id }) => {
+      // console.log(id);
+      
       try {
-        return posts.find((post) => post.id === id);
+        return Post.findById(id);
       } catch (error) {
         throw new Error(error.message);
       }
@@ -142,8 +135,6 @@ const resolvers = {
 
   Mutation: {
     createPost: async (_, args) => {
-      console.log(args.content, args.imgUrl, args.authorId);
-
       try {
         const newPost = await Post.createPost(
           args.content,
@@ -160,7 +151,6 @@ const resolvers = {
     updatePost: async (_, args) => {
       try {
         const { _id, content, tags, imgUrl } = args;
-
         const postIndex = posts.findIndex((post) => post.id === _id);
 
         if (postIndex === -1) {
@@ -181,8 +171,6 @@ const resolvers = {
     register: async (_, args) => {
       try {
         const { name, username, email, password } = args;
-        // console.log(name, username, email, password);
-        
         const hashedPassword = hashPassword(password);
 
         const newUser = await User.createUser({
@@ -192,17 +180,13 @@ const resolvers = {
           password: hashedPassword,
         });
 
-        // console.log(newUser);
-        
-
         return {
-          _id: newUser._id,  
+          _id: newUser._id,
           name: newUser.name,
           username: newUser.username,
           email: newUser.email,
           password: newUser.password,
-        }
-
+        };
       } catch (error) {
         throw new Error(error.message);
       }
@@ -210,17 +194,21 @@ const resolvers = {
 
     login: async (_, { username, password }) => {
       try {
-
         const userData = await User.login({ username, password });
-        // console.log(userData);
-        
         return {
           user: userData.user,
           accessToken: userData.token,
-        }
-        
-        
-        
+        };
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+
+    commentPost: async (_, { postId, comment }) => {
+      try {
+        const newComment = { content: comment.content, username: comment.username };
+        const updatedPost = await Post.addComment(postId, newComment);
+        return updatedPost;
       } catch (error) {
         throw new Error(error.message);
       }
