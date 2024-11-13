@@ -66,6 +66,7 @@ const typeDefs = `#graphql
     getUserDetail: User
     postById(id: ID!): Post
     userById(_id: ID!): User
+    search(query: String!): [User]
   }
 
   type Mutation {
@@ -118,7 +119,15 @@ const resolvers = {
         throw new Error(error.message);
       }
     },
-    
+    search: async (_, args) => { 
+      try {
+        const users = await User.search(args.query);
+        return users;
+      } catch (err) {
+        console.log(err)
+        throw err
+      }
+     }
   },
 
   Mutation: {

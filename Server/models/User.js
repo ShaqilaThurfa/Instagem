@@ -3,27 +3,25 @@ const { checkPassword } = require("../helpers/hashingpassword");
 const { signToken } = require("../helpers/jwt");
 const { ObjectId } = require("mongodb");
 
-
 class User {
   static async findAll() {
-    const userscollection = database.collection("users");
+    const usersCollection = database.collection("users");
 
-    // Query for movies that have a runtime less than 15 minutes
-    // const query = { runtime: { $lt: 15 } };
     const options = {
-      // Sort returned documents in ascending order by title (A->Z)
       sort: { name: 1 },
-      // Include only the `title` and `imdb` fields in each returned document
-      projection: { name: 1, username: 1, username: 1 },
+      projection: { name: 1, username: 1, email: 1 },
     };
 
-    const users = await userscollection.find({}, options).toArray();
-    // Print a message if no documents were found
-    return users;
+    const users = await usersCollection.find({}, options).toArray();
+
+    return users.map(user => ({
+      ...user,
+      _id: user._id.toString(),
+    }));
   }
 
   static async createUser({ name, username, email, password }) {
-    const userscollection = database.collection("users");
+    const usersCollection = database.collection("users");
 
     const newUser = {
       name,
@@ -31,60 +29,80 @@ class User {
       email,
       password,
     };
-    const result = await userscollection.insertOne(newUser);
 
-    console.log(result);
-
-    return {
-      ...newUser,
-      _id: result.insertedId,
-    };
+    try {
+      const result = await usersCollection.insertOne(newUser);
+      return {
+        ...newUser,
+        _id: result.insertedId.toString(),
+      };
+    } catch (error) {
+      console.error("Failed to create user:", error.message);
+      throw new Error("User creation failed");
+    }
   }
 
   static async login({ username, password }) {
     try {
-      const userscollection = database.collection("users");
+      const usersCollection = database.collection("users");
 
-      const user = await userscollection.findOne({ username });
-
+      const user = await usersCollection.findOne({ username });
       if (!user) {
         throw new Error("User not found");
       }
 
       const isPasswordValid = checkPassword(password, user.password);
-
       if (!isPasswordValid) {
         throw new Error("Invalid username/password");
       }
 
-      const token = {
-        accessToken: signToken({
-          id: user._id,
-          email: user.username,
-        }),
-      };
+      const token = signToken({
+        id: user._id.toString(),
+        username: user.username,
+      });
 
-      if (!token) {
-        throw new Error("Invalid token");
-      }
-
-      console.log("coba ini",token);
-      
-
-      return { user, token: token.accessToken };
+      return { user, token };
     } catch (error) {
+      console.error("Login error:", error.message);
       throw new Error("Failed to Login");
     }
   }
 
-  static async findById(_id) { 
-    const userscollection = database.collection("users");
+  static async findById(_id) {
+    const usersCollection = database.collection("users");
 
-    const user = await userscollection.findOne({ _id: new ObjectId(_id) });
+    const user = await usersCollection.findOne({ _id: new ObjectId(_id) });
     if (!user) {
       throw new Error("User not found");
     }
-    return user;
+
+    return {
+      ...user,
+      _id: user._id.toString(),
+    };
+  }
+
+  static async search(query) {
+    try {
+      const usersCollection = database.collection("users");
+      const regex = new RegExp(query, 'i');
+
+      const users = await usersCollection.find({
+        $or: [
+          { name: { $regex: regex } },
+          { username: { $regex: regex } },
+        ],
+      }).toArray();
+
+      return users.map(user => ({
+        ...user,
+        _id: user._id.toString(),
+      }));
+    } catch (error) {
+      console.error("Search error:", error.message);
+      throw new Error("User not found");
+    }
   }
 }
+
 module.exports = User;
