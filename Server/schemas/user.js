@@ -1,92 +1,103 @@
-const User= require("../models/User")
 
-const typeDefs = `#graphql
-  
+const { hashPassword } = require('../helpers/hashingpassword');
+const User = require('../models/User');
+const { ObjectId } = require('mongodb');
+
+const userTypeDefs = `#graphql
   type User {
-    name: String
-    username: String
-    email: String
+    _id: ID!
+    name: String!
+    username: String!
+    email: String!
     password: String
+    followers: [User!]!
+    following: [User!]!
   }
 
-  type Post {
-    content: String
-    tags: [String]
-    imgUrl: String
-    authorId: ID
-    comments: [Comment]
-    likes: [Like]
-    createdAt: String
-    updatedAt: String
+  type Token {
+    user: User
+    accessToken: String
   }
 
-  type Comment {
-    content: String
-    username: String
-    createdAt: String
-    updatedAt: String
-  }
-
-  type Like {
-    username: String
-    createdAt: String
-    updatedAt: String
-  }
-
-  type Follow {
-    followingId: ID
-    followerId: ID
-    createdAt: String
-    updatedAt: String
-  }
-
-  type Query {
+   type Query {
     users: [User]
-    posts: [Post]
-    comments: [Comment]
-    likes: [Like]
-    follows: [Follow]
-    userById(id: ID!): User
+    getUserDetail: User
+    userById(_id: ID!): User
+    search(query: String!): [User]
+    getUserWithFollowersandFollowing(userId: ID!): User
   }
 
-  type Mutation {
-    addUser(
-    id: Int,
-    name: String,
-    username: String,
-    email: String,
-    password: String): User
+   type Mutation {
+    register(name: String!, username: String!, email: String!, password: String!): User
+    login(username: String!, password: String!): Token
   }
 `;
 
 
-
-const resolvers = {
+const userResolvers = {
   Query: {
     users: async () => {
       try {
-        const users = await User.findAll();
-        return users;
+        return await User.findAll();
       } catch (error) {
         throw new Error(error.message);
       }
     },
-    
-    // posts: () => posts,
-    // likes: () => likes,
-    // comments: () => comments,
-    // follows: () => follows, 
-    // userById: (_, args) => {
-    //   return users.find((user) => user.id == args.id);
-    // }
+    userById: async (_, { _id }) => {
+      try {
+        return await User.findById(new ObjectId(_id));
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    search: async (_, { query }) => {
+      try {
+        return await User.search(query);
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    },
+    getUserWithFollowersandFollowing: async (_, { userId }) => {
+      try {
+        const follower = await User.follower(userId);
+        const following = await User.following(userId);
+
+        console.log(follower[0].followerId);
+        
+        return follower, following
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    },
   },
 
-  // Mutation: {
-  //   addUser: (_, args) => {
-  //    const newUser = ({...args})
-  //    users.push(newUser);
-  //    return newUser
-  //   }
-  // }
+  Mutation: {
+    register: async (_, { name, username, email, password }) => {
+      try {
+        const hashedPassword = hashPassword(password);
+        const newUser = await User.createUser({
+          name,
+          username,
+          email,
+          password: hashedPassword,
+        });
+        return newUser;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    login: async (_, { username, password }) => {
+      try {
+        const userData = await User.login({ username, password });
+        return {
+          user: userData.user,
+          accessToken: userData.token,
+        };
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
+  }
 };
 
+module.exports = { userTypeDefs, userResolvers };

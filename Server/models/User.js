@@ -14,7 +14,7 @@ class User {
 
     const users = await usersCollection.find({}, options).toArray();
 
-    return users.map(user => ({
+    return users.map((user) => ({
       ...user,
       _id: user._id.toString(),
     }));
@@ -85,22 +85,81 @@ class User {
   static async search(query) {
     try {
       const usersCollection = database.collection("users");
-      const regex = new RegExp(query, 'i');
+      const regex = new RegExp(query, "i");
 
-      const users = await usersCollection.find({
-        $or: [
-          { name: { $regex: regex } },
-          { username: { $regex: regex } },
-        ],
-      }).toArray();
+      const users = await usersCollection
+        .find({
+          $or: [{ name: { $regex: regex } }, { username: { $regex: regex } }],
+        })
+        .toArray();
 
-      return users.map(user => ({
+      return users.map((user) => ({
         ...user,
         _id: user._id.toString(),
       }));
     } catch (error) {
       console.error("Search error:", error.message);
       throw new Error("User not found");
+    }
+  }
+
+  static async follower(userId) {
+    try {
+      const followCollection = database.collection("follows");
+
+      const result = await followCollection
+        .aggregate([
+          {
+            $match: {
+              followingId: new ObjectId(userId),
+            },
+          },
+          {
+            $lookup: {
+              from: "follows",
+              localField: "_id",
+              foreignField: "followingId",
+              as: "followers",
+            },
+          },
+        ])
+        .toArray();
+
+      console.log(result);
+
+      return result[0];
+    } catch (error) {
+      throw new Error("Follower not found");
+    }
+  }
+
+  static async following(userId) {
+    try {
+      const followCollection = database.collection("follows");
+
+      const result = await followCollection
+        .aggregate([
+          {
+            $match: {
+              followerId: new ObjectId(userId),
+            },
+          },
+          {
+            $lookup: {
+              from: "follows",
+              localField: "_id",
+              foreignField: "followerId",
+              as: "following",
+            },
+          },
+        ])
+        .toArray();
+
+      console.log(result);
+
+      return result[0];
+    } catch (error) {
+      throw new Error("Following not found");
     }
   }
 }
