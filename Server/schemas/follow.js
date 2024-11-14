@@ -1,8 +1,6 @@
 
 const Follow = require("../models/Follow");
 
-
-
 const FollowtypeDefs = `#graphql
 
 type Follow {
@@ -36,25 +34,30 @@ input FollowingInput{
 
 const Followresolvers = {
   Query: {
-    followers: async (_, { userId }) => {
+    followers: async (_, { userId }, { auth }) => {
+      auth();
       const followers = await Follow.findAllUserFollowers(userId);
       return followers;
     },
-    following: async (_, { userId }) => {
+    following: async (_, { userId }, { auth }) => {
+      auth(); 
       const following = await Follow.findAllUserFollowing(userId);
       return following;
     },
-    followersCount: async (_, { userId }) => {
+    followersCount: async (_, { userId }, { auth }) => {
+      auth();
       const followers = await Follow.countFollowers(userId);
       return followers;
     },
-    followingCount: async (_, { userId }) => {
+    followingCount: async (_, { userId }, { auth }) => {
+      auth();
       const following = await Follow.countFollowing(userId);
       return following;
     },
   },
   Mutation: {
-    followUser: async (_, { followerId, followingId }) => {
+    followUser: async (_, { followerId, followingId }, { auth }) => {
+      auth();
       const follow = await Follow.createFollow(followerId, followingId);
       return follow;
     },

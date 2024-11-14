@@ -10,8 +10,8 @@ const userTypeDefs = `#graphql
     username: String!
     email: String!
     password: String
-    followers: [User!]!
-    following: [User!]!
+    followers: [User]
+    followings: [User]
   }
 
   type Token {
@@ -24,7 +24,6 @@ const userTypeDefs = `#graphql
     # getUserDetail: User
     userById(_id: ID!): User
     search(query: String!): [User]
-    getUserWithFollowersandFollowing(userId: ID!): User
   }
 
    type Mutation {
@@ -43,31 +42,25 @@ const userResolvers = {
         throw new Error(error.message);
       }
     },
-    userById: async (_, { _id }) => {
+    userById: async (_, { _id }, { auth }) => {
       try {
-        return await User.findById(new ObjectId(_id));
+        auth();
+        const user = await User.findById(new ObjectId(_id));
+        // console.log(user, 'ini user di schema');
+
+        return user;
       } catch (error) {
         throw new Error(error.message);
       }
     },
-    search: async (_, { query }) => {
+    search: async (_, { query }, { auth }) => {
       try {
+        auth();
         return await User.search(query);
       } catch (err) {
         throw new Error(err.message);
       }
-    },
-    getUserWithFollowersandFollowing: async (_, { userId }) => {
-      try {
-        const follower = await User.follower(userId);
-        const following = await User.following(userId);
-
-        
-        return follower, following
-      } catch (err) {
-        throw new Error(err.message);
-      }
-    },
+    }
   },
 
   Mutation: {

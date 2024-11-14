@@ -44,7 +44,7 @@ const postTypeDefs = `#graphql
   }
 
    type Mutation {
-    createPost(content: String!, tags: [String], imgUrl: String, authorId: ID!): Post
+    createPost(content: String!, tags: [String], imgUrl: String): Post
     updatePost(_id: ID!, tags: [String], content: String, imgUrl: String): Post
     commentPost(postId: ID!, comment: CommentInput!): Post
     likePost(postId: ID!, like: LikeInput!): Post
@@ -55,7 +55,7 @@ const postResolvers = {
   Query: {
     posts: async (_, __, { auth }) => {
       try {
-        auth()
+        auth();
         const memory = await redis.get("posts");
         if (memory) {
           console.log(memory, "ini dari schema post");
@@ -68,8 +68,9 @@ const postResolvers = {
         throw new Error(error.message);
       }
     },
-    postById: async (_, { id }) => {
+    postById: async (_, { id }, { auth }) => {
       try {
+        auth();
         const data = await Post.findById(new ObjectId(id));
         console.log(data, "ini dari schema post");
 
@@ -81,10 +82,14 @@ const postResolvers = {
   },
 
   Mutation: {
-    createPost: async (_, { content, tags, imgUrl, authorId }) => {
+    createPost: async (_, { content, tags, imgUrl }, { auth }) => {
       try {
+        auth();
+        const user = auth();
+        console.log(user.id, "ini user id");
+        
         redis.del("posts");
-        return await Post.createPost(content, imgUrl, authorId, tags);
+        return await Post.createPost(content, tags, imgUrl, authorId= new ObjectId(user.id));
       } catch (error) {
         throw new Error(error.message);
       }
@@ -99,8 +104,9 @@ const postResolvers = {
         throw new Error(error.message);
       }
     },
-    commentPost: async (_, { postId, comment }) => {
+    commentPost: async (_, { postId, comment }, { auth }) => {
       try {
+        auth();
         const newComment = {
           content: comment.content,
           username: comment.username,
@@ -110,14 +116,19 @@ const postResolvers = {
         throw new Error(error.message);
       }
     },
-    likePost: async (_, { postId, like }) => {
-      const newLike = {
-        ...like,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      const updatedPost = await Post.addLike(postId, newLike);
-      return updatedPost;
+    likePost: async (_, { postId, like }, { auth }) => {
+      try {
+        auth();
+        const newLike = {
+          ...like,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const updatedPost = await Post.addLike(postId, newLike);
+        return updatedPost;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     },
   },
 };

@@ -6,7 +6,7 @@ module.exports = class Post {
   static async findAll() {
     const postsCollection = database.collection("posts");
 
-    const posts = await postsCollection.aggregate([ 
+    const posts = await postsCollection.aggregate([
       {
         $lookup: {
           from: "users",
@@ -26,18 +26,23 @@ module.exports = class Post {
           createdAt: 1,
           updatedAt: 1,
           comments: 1,
+          authorId: 1,
           likes: 1,
           "authorDetails.name": 1,
           "authorDetails.username": 1,
           "authorDetails.email": 1,
         },
       },
-     ]).toArray();
+      {
+        $sort: { createdAt: -1 }  // Perbaikan di sini
+      }
+    ]).toArray();
 
     console.log(posts);
     
     return posts;
-  }
+}
+
 
   static async findById(id) {
    try {
@@ -68,6 +73,7 @@ module.exports = class Post {
           createdAt: 1,
           updatedAt: 1,
           comments: 1,
+          authorId: 1,
           likes: 1,
           "authorDetails.name": 1,
           "authorDetails.username": 1,
@@ -85,15 +91,15 @@ module.exports = class Post {
    }
   }
 
-  static async createPost(content, imgUrl, authorId, tags) {
+  static async createPost(content, tags, imgUrl, authorId) {
     const postsCollection = database.collection("posts");
 
     const timestamp = new Date();
     const newPost = {
       content,
       imgUrl,
-      authorId: new ObjectId(authorId),
       tags,
+      authorId,
       createdAt: timestamp,
       updatedAt: timestamp,
       comments: [],

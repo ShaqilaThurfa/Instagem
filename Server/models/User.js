@@ -68,17 +68,21 @@ class User {
     }
   }
 
-  static async findById(_id) {
+  static async findById(id) {
     const usersCollection = database.collection("users");
 
-    const user = await usersCollection.findOne({ _id: new ObjectId(_id) });
+    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
     if (!user) {
       throw new Error("User not found");
     }
 
+    // console.log(await this.follower(_id), 'ini follower');
+
     return {
       ...user,
       _id: user._id.toString(),
+      followers:  await this.follower(id),
+      followings: await this.following(id),
     };
   }
 
@@ -105,63 +109,93 @@ class User {
 
   static async follower(userId) {
     try {
-      const followCollection = database.collection("users");
-
+      const followCollection = database.collection("follows");
+  
       const result = await followCollection
         .aggregate([
           {
             $match: {
-              _id: new ObjectId(userId),
+              followingId: new ObjectId(userId),
             },
           },
           {
             $lookup: {
-              from: "follows",
-              localField: "_id",
-              foreignField: "followingId",
-              as: "followers",
+              from: "users",
+              localField: "followerId",
+              foreignField: "_id",
+              as: "users",
             },
+          },
+          {
+            $unwind: {
+              path: "$users",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $project: {
+              "users._id": 1,
+              "users.name": 1,
+              "users.username": 1,
+              "users.email": 1,
+            }
           },
         ])
         .toArray();
-
-      console.log(result[0], 'ini follower');
-
-      return result[0];
+  
+      // console.log(result, 'ini result follower');
+      
+      return result.map((item) => item.users) || [];
     } catch (error) {
+      console.error("Follower not found:", error.message);
       throw new Error("Follower not found");
     }
   }
-
+  
   static async following(userId) {
     try {
-      const followCollection = database.collection("users");
-
+      const followCollection = database.collection("follows");
+  
       const result = await followCollection
         .aggregate([
           {
             $match: {
-              _id: new ObjectId(userId),
+              followerId: new ObjectId(userId),
             },
           },
           {
             $lookup: {
-              from: "follows",
-              localField: "_id",
-              foreignField: "followerId",
-              as: "following",
+              from: "users",
+              localField: "followingId",
+              foreignField: "_id",
+              as: "users",
             },
+          },
+          {
+            $unwind: {
+              path: "$users",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $project: {
+              "users._id": 1,
+              "users.name": 1,
+              "users.username": 1,
+              "users.email": 1,
+            }
           },
         ])
         .toArray();
-
-      console.log(result[0], 'ini following');
-
-      return result[0];
+  
+      
+      return result.map((item) => item.users) || [];
     } catch (error) {
+      console.error("Following not found:", error.message);
       throw new Error("Following not found");
     }
   }
+  
 }
 
 module.exports = User;
