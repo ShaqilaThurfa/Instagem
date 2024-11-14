@@ -1,7 +1,6 @@
-
 const { ObjectId } = require("mongodb");
 const Post = require("../models/Post");
-
+const redis = require("../config/redis");
 
 const postTypeDefs = `#graphql
   type Post {
@@ -52,12 +51,18 @@ const postTypeDefs = `#graphql
   }
 `;
 
-
 const postResolvers = {
   Query: {
-    posts: async (_, __, {auth}) => {
+    posts: async (_, __, { auth }) => {
       try {
         auth()
+        const memory = await redis.get("posts");
+        if (memory) {
+          console.log(memory, "ini dari schema post");
+          return JSON.parse(memory);
+        }
+
+        redis.set("posts", JSON.stringify(await Post.findAll()));
         return await Post.findAll();
       } catch (error) {
         throw new Error(error.message);
@@ -66,13 +71,13 @@ const postResolvers = {
     postById: async (_, { id }) => {
       try {
         const data = await Post.findById(new ObjectId(id));
-        console.log(data, 'ini dari schema post');
-        
+        console.log(data, "ini dari schema post");
+
         return data;
       } catch (error) {
         throw new Error(error.message);
       }
-    }
+    },
   },
 
   Mutation: {
@@ -95,14 +100,16 @@ const postResolvers = {
     },
     commentPost: async (_, { postId, comment }) => {
       try {
-        const newComment = { content: comment.content, username: comment.username };
+        const newComment = {
+          content: comment.content,
+          username: comment.username,
+        };
         return await Post.addComment(postId, newComment);
       } catch (error) {
         throw new Error(error.message);
       }
     },
     likePost: async (_, { postId, like }) => {
-
       const newLike = {
         ...like,
         createdAt: new Date().toISOString(),
@@ -111,7 +118,7 @@ const postResolvers = {
       const updatedPost = await Post.addLike(postId, newLike);
       return updatedPost;
     },
-  }
+  },
 };
 
 module.exports = { postTypeDefs, postResolvers };

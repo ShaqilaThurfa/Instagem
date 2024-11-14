@@ -1,18 +1,40 @@
 const { ObjectId } = require("mongodb");
 const { database } = require("../config/mongodb");
 
+
 module.exports = class Post {
   static async findAll() {
     const postsCollection = database.collection("posts");
 
-    const options = {
-      sort: { createdAt: -1 },
-      projection: { content: 1, imgUrl: 1, authorId: 1, tags: 1, createdAt: 1, updatedAt: 1, comments: 1, likes: 1 },
-    };
+    const posts = await postsCollection.aggregate([ 
+      {
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "authorDetails",
+        },
+      },
+      {
+        $unwind: "$authorDetails",
+      },
+      {
+        $project: {
+          content: 1,
+          imgUrl: 1,
+          tags: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          comments: 1,
+          likes: 1,
+          "authorDetails.name": 1,
+          "authorDetails.username": 1,
+          "authorDetails.email": 1,
+        },
+      },
+     ]).toArray();
 
-    const posts = await postsCollection.find({}, options).toArray();
-
-    // console.log(posts);
+    console.log(posts);
     
     return posts;
   }

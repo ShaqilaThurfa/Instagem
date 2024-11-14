@@ -21,7 +21,7 @@ const userTypeDefs = `#graphql
 
    type Query {
     users: [User]
-    getUserDetail: User
+    # getUserDetail: User
     userById(_id: ID!): User
     search(query: String!): [User]
     getUserWithFollowersandFollowing(userId: ID!): User
@@ -62,7 +62,6 @@ const userResolvers = {
         const follower = await User.follower(userId);
         const following = await User.following(userId);
 
-        console.log(follower[0].followerId);
         
         return follower, following
       } catch (err) {

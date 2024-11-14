@@ -105,13 +105,13 @@ class User {
 
   static async follower(userId) {
     try {
-      const followCollection = database.collection("follows");
+      const followCollection = database.collection("users");
 
       const result = await followCollection
         .aggregate([
           {
             $match: {
-              followingId: new ObjectId(userId),
+              _id: new ObjectId(userId),
             },
           },
           {
@@ -125,7 +125,7 @@ class User {
         ])
         .toArray();
 
-      console.log(result);
+      console.log(result[0], 'ini follower');
 
       return result[0];
     } catch (error) {
@@ -135,13 +135,13 @@ class User {
 
   static async following(userId) {
     try {
-      const followCollection = database.collection("follows");
+      const followCollection = database.collection("users");
 
       const result = await followCollection
         .aggregate([
           {
             $match: {
-              followerId: new ObjectId(userId),
+              _id: new ObjectId(userId),
             },
           },
           {
@@ -155,7 +155,7 @@ class User {
         ])
         .toArray();
 
-      console.log(result);
+      console.log(result[0], 'ini following');
 
       return result[0];
     } catch (error) {
