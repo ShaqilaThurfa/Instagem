@@ -83,6 +83,7 @@ const postResolvers = {
   Mutation: {
     createPost: async (_, { content, tags, imgUrl, authorId }) => {
       try {
+        redis.del("posts");
         return await Post.createPost(content, imgUrl, authorId, tags);
       } catch (error) {
         throw new Error(error.message);
