@@ -55,7 +55,7 @@ const postResolvers = {
   Query: {
     posts: async (_, __, { auth }) => {
       try {
-        // auth();
+        auth();
         console.log('masuk ga?');
         
         const memory = await redis.get("posts");
