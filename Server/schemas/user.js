@@ -1,4 +1,3 @@
-
 const { hashPassword } = require('../helpers/hashingpassword');
 const User = require('../models/User');
 const { ObjectId } = require('mongodb');
