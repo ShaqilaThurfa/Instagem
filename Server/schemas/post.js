@@ -4,7 +4,7 @@ const redis = require("../config/redis");
 
 const postTypeDefs = `#graphql
   type Post {
-    id: ID
+    _id: ID
     content: String
     tags: [String]
     imgUrl: String
@@ -55,7 +55,9 @@ const postResolvers = {
   Query: {
     posts: async (_, __, { auth }) => {
       try {
-        auth();
+        // auth();
+        console.log('masuk ga?');
+        
         const memory = await redis.get("posts");
         if (memory) {
           console.log(memory, "ini dari schema post");

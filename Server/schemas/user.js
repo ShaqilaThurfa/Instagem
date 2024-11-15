@@ -27,7 +27,7 @@ const userTypeDefs = `#graphql
   }
 
    type Mutation {
-    register(name: String!, username: String!, email: String!, password: String!): User
+    register(name: String!, username: String!, email: String!, password: String!): String
     login(username: String!, password: String!): Token
   }
 `;
@@ -67,13 +67,13 @@ const userResolvers = {
     register: async (_, { name, username, email, password }) => {
       try {
         const hashedPassword = hashPassword(password);
-        const newUser = await User.createUser({
+        await User.createUser({
           name,
           username,
           email,
           password: hashedPassword,
         });
-        return newUser;
+        return "Register success!";
       } catch (error) {
         throw new Error(error.message);
       }

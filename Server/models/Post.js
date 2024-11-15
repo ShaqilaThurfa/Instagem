@@ -19,21 +19,6 @@ module.exports = class Post {
         $unwind: "$authorDetails",
       },
       {
-        $project: {
-          content: 1,
-          imgUrl: 1,
-          tags: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          comments: 1,
-          authorId: 1,
-          likes: 1,
-          "authorDetails.name": 1,
-          "authorDetails.username": 1,
-          "authorDetails.email": 1,
-        },
-      },
-      {
         $sort: { createdAt: -1 }  // Perbaikan di sini
       }
     ]).toArray();
