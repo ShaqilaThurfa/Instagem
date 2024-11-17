@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     const checkToken = async () => {
       try {
         const token = await SecureStore.getItemAsync("accessToken");
-        setIsSignedIn(!!token); // Update state berdasarkan token
+        setIsSignedIn(!!token);
       } catch (error) {
         console.error("Failed to retrieve token:", error);
       }

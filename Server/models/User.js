@@ -76,8 +76,6 @@ class User {
       throw new Error("User not found");
     }
 
-    // console.log(await this.follower(_id), 'ini follower');
-
     return {
       ...user,
       _id: user._id.toString(),

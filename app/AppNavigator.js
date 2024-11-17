@@ -14,7 +14,7 @@ import LogoutScreen from "./screen/LogOut";
 import SearchUserScreen from "./screen/SearchUser";
 import UserDetailScreen from "./screen/GetUserById";
 import UserProfileScreen from "./screen/ProfileUser";
-
+import { Ionicons } from '@expo/vector-icons';
 
 
 const Stack = createNativeStackNavigator();
@@ -23,21 +23,38 @@ const Tab = createBottomTabNavigator();
 function HomeTabs() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="HomeScreen" component={HomeScreen} />
+      <Tab.Screen name="HomeScreen" component={HomeScreen}
+      options={{
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="home" size={size} color={color} />
+        ),
+      }} />
       <Tab.Screen
         name="Create"
         component={CreatePostScreen}
-        options={{ headerShown: false }}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-circle-sharp" size={size} color={color} />
+          ),
+        }} 
       />
       <Tab.Screen
         name="Search"
         component={SearchUserScreen}
-        options={{ headerShown: false }}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" size={size} color={color} /> 
+          ),
+        }} 
       />
       <Tab.Screen
         name="Profile"
         component={UserProfileScreen}
-        options={{ headerShown: false }}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-sharp" size={size} color={color} /> 
+          ),
+        }} 
       />
     </Tab.Navigator>
   );

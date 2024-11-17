@@ -1,4 +1,4 @@
-// apolloClient.js
+
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from "@apollo/client";
 import * as SecureStore from 'expo-secure-store';
 

@@ -144,7 +144,7 @@ export default function HomeScreen() {
               <Text style={styles.content}>{item.content}</Text>
             </TouchableOpacity>
 
-            {/* Footer */}
+            
             <View style={styles.footer}>
               <TouchableOpacity onPress={() => handleOnLike(item._id)}>
                 <Text style={styles.icon}>
