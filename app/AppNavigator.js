@@ -2,13 +2,14 @@ import React, { useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Button, TouchableOpacity } from "react-native";
+import { Button, StyleSheet, TouchableOpacity } from "react-native";
 import AuthContext from "./contexts/auth";
 import RegisterScreen from "./screen/Register";
 import LoginScreen from "./screen/Login";
 import HomeScreen from "./screen/HomeScreen";
 import CreatePostScreen from "./screen/CreatePost";
 import PostDetailScreen from "./screen/PostDetail";
+
 
 import SearchUserScreen from "./screen/SearchUser";
 import UserProfileScreen from "./screen/ProfileUser";
@@ -103,3 +104,19 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff", 
+  },
+  instagramText: {
+    fontSize: 40, 
+    fontWeight: "bold", 
+    fontFamily: "Helvetica", 
+    color: "#000", 
+    letterSpacing: 1.5, 
+  },
+});
