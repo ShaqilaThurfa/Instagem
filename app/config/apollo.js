@@ -2,7 +2,7 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from "@apollo/client";
 import * as SecureStore from 'expo-secure-store';
 
-const httpLink = new HttpLink({ uri: "https://d74b-2a09-bac1-34e0-18-00-da-d4.ngrok-free.app/" }); 
+const httpLink = new HttpLink({ uri: "http://103.186.0.52:4000/" }); 
 
 const authLink = new ApolloLink(async (operation, forward) => {
  
