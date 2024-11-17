@@ -23,6 +23,7 @@ const userTypeDefs = `#graphql
     # getUserDetail: User
     userById(_id: ID!): User
     search(query: String!): [User]
+    userProfile: User
   }
 
    type Mutation {
@@ -50,6 +51,21 @@ const userResolvers = {
         return user;
       } catch (error) {
         throw new Error(error.message);
+      }
+    },
+    userProfile: async (_, __, { auth }) => {
+      try {
+        // console.log(auth, 'ini auth di schema');
+        
+        const user = auth(); 
+        // console.log(user, 'ini user di schema');
+        
+        const userprofile = await User.findById(user.id);
+        console.log(userprofile, 'ini user profile');
+        return userprofile;
+      } catch (error) {
+        console.error("Error fetching user profile:", error.message);
+        throw new Error("Failed to fetch user profile.");
       }
     },
     search: async (_, { query }, { auth }) => {

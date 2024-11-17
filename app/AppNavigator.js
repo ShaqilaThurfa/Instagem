@@ -12,6 +12,9 @@ import { View } from "react-native";
 import PostDetailScreen from "./screen/PostDetail";
 import LogoutScreen from "./screen/LogOut";
 import SearchUserScreen from "./screen/SearchUser";
+import UserDetailScreen from "./screen/GetUserById";
+import UserProfileScreen from "./screen/ProfileUser";
+
 
 
 const Stack = createNativeStackNavigator();
@@ -24,12 +27,17 @@ function HomeTabs() {
       <Tab.Screen
         name="Create"
         component={CreatePostScreen}
-        options={{ headerShown: true }}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name="Search"
         component={SearchUserScreen}
-        options={{ headerShown: true }}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={UserProfileScreen}
+        options={{ headerShown: false }}
       />
     </Tab.Navigator>
   );
@@ -47,6 +55,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Home" component={HomeTabs} />
             <Stack.Screen name="PostDetail" component={PostDetailScreen} />
+            <Stack.Screen name="UserDetail" component={UserDetailScreen} />
             <Stack.Screen name="Logout" component={LogoutScreen} />
           </>
         ) : (

@@ -85,6 +85,7 @@ class User {
       followings: await this.following(id),
     };
   }
+ 
 
   static async search(query) {
     try {

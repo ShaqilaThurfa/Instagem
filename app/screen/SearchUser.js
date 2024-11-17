@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client";
 import { gql } from "@apollo/client";
 import debounce from "lodash.debounce";
 import { useFollowUser } from "./Follow";
-
+import { useNavigation } from "@react-navigation/native";
 
 const SEARCH_USERS = gql`
   query Search($query: String!) {
@@ -27,6 +27,7 @@ const SEARCH_USERS = gql`
 export default function SearchUserScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchUsers, { loading, data, error }] = useLazyQuery(SEARCH_USERS);
+  const navigation = useNavigation();
   const {
     handleFollow,
     loading: followLoading,
@@ -36,12 +37,10 @@ export default function SearchUserScreen() {
   const handleSearch = useCallback(
     debounce((query) => {
       if (query.trim()) {
-        searchUsers({
-          variables: { query },
-        });
+        searchUsers({ variables: { query } });
       }
     }, 500),
-    []
+    [searchUsers]
   );
 
   const onChangeText = (text) => {
@@ -51,11 +50,15 @@ export default function SearchUserScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.userItem}>
-      <View style={styles.avatarPlaceholder}>
-        <Text style={styles.avatarText}>
-          {item.username.charAt(0).toUpperCase()}
-        </Text>
-      </View>
+      <TouchableOpacity style={styles.avatarPlaceholder} onPress={() =>
+        navigation.navigate("UserDetail", { userId: item._id })
+      }>
+        <View>
+          <Text style={styles.avatarText}>
+            {item.username.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+      </TouchableOpacity>
       <Text style={styles.username}>{item.username}</Text>
       <TouchableOpacity
         style={styles.followButton}
@@ -77,6 +80,7 @@ export default function SearchUserScreen() {
       />
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {error && <Text style={styles.errorText}>Error: {error.message}</Text>}
+
       {data && data.search.length === 0 && (
         <Text style={styles.noResultsText}>No users found.</Text>
       )}
@@ -118,7 +122,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#ccc",
+    backgroundColor: "#007BFF",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,

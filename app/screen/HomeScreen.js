@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import * as SecureStore from "expo-secure-store";
 
-// Query untuk mendapatkan post
+
 const GET_POST = gql`
   query Posts {
     posts {
