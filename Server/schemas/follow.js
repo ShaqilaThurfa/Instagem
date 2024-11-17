@@ -1,4 +1,5 @@
 
+const { ObjectId } = require("mongodb");
 const Follow = require("../models/Follow");
 
 const FollowtypeDefs = `#graphql
@@ -19,7 +20,7 @@ type Query {
 }
 
 type Mutation {
-  followUser(followerId: ID!, followingId: ID!): Follow
+  followUser(followingId: ID!): String
 }
 
 input FollowerInput{
@@ -56,10 +57,12 @@ const Followresolvers = {
     },
   },
   Mutation: {
-    followUser: async (_, { followerId, followingId }, { auth }) => {
-      auth();
-      const follow = await Follow.createFollow(followerId, followingId);
-      return follow;
+    followUser: async (_, { followingId }, { auth }) => {
+      const user = auth();
+      
+      const follow = await Follow.createFollow(followerId = new ObjectId(user.id), followingId);
+      
+      return "You just followed a user";
     },
   },
 }

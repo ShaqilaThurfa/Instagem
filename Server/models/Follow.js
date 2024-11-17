@@ -72,7 +72,7 @@ module.exports = class Follow {
     const followCollection = database.collection("follows");
 
     const alreadyFollowed = await followCollection.findOne({
-      followerId: new ObjectId(followerId),
+      followerId,
       followingId: new ObjectId(followingId),
     });
 
@@ -81,7 +81,7 @@ module.exports = class Follow {
     }
 
     const newFollow = {
-      followerId: new ObjectId(followerId),
+      followerId,
       followingId: new ObjectId(followingId),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
