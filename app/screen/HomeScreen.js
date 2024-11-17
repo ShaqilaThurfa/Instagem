@@ -52,6 +52,7 @@ export default function HomeScreen() {
   const navigation = useNavigation();
   const { loading, error, data, refetch } = useQuery(GET_POST);
   
+  
   const [likePost] = useMutation(LIKE_POST, {
     update(cache, { data: { likePost } }) {
       const existingPosts = cache.readQuery({ query: GET_POST });
