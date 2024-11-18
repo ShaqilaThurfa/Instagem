@@ -27,7 +27,10 @@ const LOGIN = gql`
 export default function LoginScreen() {
   const navigation = useNavigation();
 
-  const [loginUser, { loading }] = useMutation(LOGIN);
+  const [loginUser, { loading }] = useMutation(LOGIN, {
+    refetchQueries: ['userProfile'],
+  });
+  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 

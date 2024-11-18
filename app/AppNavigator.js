@@ -9,7 +9,7 @@ import LoginScreen from "./screen/Login";
 import HomeScreen from "./screen/HomeScreen";
 import CreatePostScreen from "./screen/CreatePost";
 import PostDetailScreen from "./screen/PostDetail";
-import UserDetailScreen from "./GetUserById";
+import UserDetailScreen from "./screen/GetUserById";
 
 
 import SearchUserScreen from "./screen/SearchUser";
