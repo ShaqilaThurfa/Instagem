@@ -2,7 +2,7 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from "@apollo/client";
 import * as SecureStore from 'expo-secure-store';
 
-const httpLink = new HttpLink({ uri: "http://103.186.0.52:4000/" }); 
+const httpLink = new HttpLink({ uri: "https://instagem.shaqilathurfa.online/" }); 
 
 const authLink = new ApolloLink(async (operation, forward) => {
  
