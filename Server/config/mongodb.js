@@ -14,6 +14,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    console.log(uri)
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("instagram").command({ ping: 1 });

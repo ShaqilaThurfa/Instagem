@@ -14,6 +14,7 @@ import { gql, useQuery, useMutation } from "@apollo/client";
 import * as SecureStore from "expo-secure-store";
 
 
+
 const GET_POST = gql`
   query Posts {
     posts {

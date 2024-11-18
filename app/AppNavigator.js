@@ -9,6 +9,7 @@ import LoginScreen from "./screen/Login";
 import HomeScreen from "./screen/HomeScreen";
 import CreatePostScreen from "./screen/CreatePost";
 import PostDetailScreen from "./screen/PostDetail";
+import UserDetailScreen from "./GetUserById";
 
 
 import SearchUserScreen from "./screen/SearchUser";
@@ -92,6 +93,8 @@ export default function AppNavigator() {
               }}
             />
             <Stack.Screen name="PostDetail" component={PostDetailScreen} 
+            options={{ headerShown: true }}/>
+            <Stack.Screen name="UserDetail" component={UserDetailScreen} 
             options={{ headerShown: true }}/>
           </>
         ) : (

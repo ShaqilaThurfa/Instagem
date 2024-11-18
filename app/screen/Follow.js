@@ -8,7 +8,9 @@ const FOLLOW_USER = gql`mutation FollowUser($followingId: ID!) {
 
 
 export const useFollowUser = () => {
-  const [followUser, { loading, error, data }] = useMutation(FOLLOW_USER);
+  const [followUser, { loading, error, data }] = useMutation(FOLLOW_USER, {
+    refetchQueries: ['userProfile'],
+  });  
 
   const handleFollow = async (userId) => {
     try {
